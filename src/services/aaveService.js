@@ -22,13 +22,34 @@ const poolDataProviderContract = new UiPoolDataProvider({
 });
 
 const incentiveDataProviderContract = new UiIncentiveDataProvider({
-  uiIncentiveDataProviderAddress:
-    markets.AaveV3Ethereum.UI_INCENTIVE_DATA_PROVIDER,
+  uiIncentiveDataProviderAddress: markets.AaveV3Ethereum.UI_INCENTIVE_DATA_PROVIDER,
   provider,
   chainId: ChainId.mainnet,
 });
 
-// Function to get user summary and net APY
+//  function to calculate APY
+const calculateWeightedAPY = (userReservesData) => {
+  let totalUSD = { supplied: 0, borrowed: 0 };
+  let weightedAPY = { supply: 0, borrow: 0 };
+
+  userReservesData.forEach(({ underlyingBalanceUSD, totalBorrowsUSD, reserve }) => {
+    if (parseFloat(underlyingBalanceUSD) > 0) {
+      totalUSD.supplied += parseFloat(underlyingBalanceUSD);
+      weightedAPY.supply += parseFloat(underlyingBalanceUSD) * parseFloat(reserve.supplyAPY);
+    }
+    if (parseFloat(totalBorrowsUSD) > 0) {
+      totalUSD.borrowed += parseFloat(totalBorrowsUSD);
+      weightedAPY.borrow += parseFloat(totalBorrowsUSD) * parseFloat(reserve.variableBorrowAPY);
+    }
+  });
+
+  return {
+    averageSupplyAPY: totalUSD.supplied > 0 ? weightedAPY.supply / totalUSD.supplied : 0,
+    averageBorrowAPY: totalUSD.borrowed > 0 ? weightedAPY.borrow / totalUSD.borrowed : 0,
+  };
+};
+
+// Function to get user summary
 export async function getUserSummary(address) {
   const [
     reserves,
@@ -72,32 +93,11 @@ export async function getUserSummary(address) {
     userReserves: userReserves.userReserves,
     formattedReserves,
     userEmodeCategoryId: userReserves.userEmodeCategoryId,
-    reserveIncentives: reserveIncentives,
-    userIncentives: userIncentives,
+    reserveIncentives,
+    userIncentives,
   });
 
-  // Calculate Net APY
-  let totalSuppliedUSD = 0;
-  let totalBorrowedUSD = 0;
-  let weightedSupplyAPY = 0;
-  let weightedBorrowAPY = 0;
-
-  for (const reserve of summary.userReservesData) {
-    const { underlyingBalanceUSD, totalBorrowsUSD, reserve: resData } = reserve;
-
-    if (parseFloat(underlyingBalanceUSD) > 0) {
-      totalSuppliedUSD += parseFloat(underlyingBalanceUSD);
-      weightedSupplyAPY += parseFloat(underlyingBalanceUSD) * parseFloat(resData.supplyAPY);
-    }
-
-    if (parseFloat(totalBorrowsUSD) > 0) {
-      totalBorrowedUSD += parseFloat(totalBorrowsUSD);
-      weightedBorrowAPY += parseFloat(totalBorrowsUSD) * parseFloat(resData.variableBorrowAPY);
-    }
-  }
-
-  const averageSupplyAPY = totalSuppliedUSD > 0 ? weightedSupplyAPY / totalSuppliedUSD : 0;
-  const averageBorrowAPY = totalBorrowedUSD > 0 ? weightedBorrowAPY / totalBorrowedUSD : 0;
+  const { averageSupplyAPY, averageBorrowAPY } = calculateWeightedAPY(summary.userReservesData);
 
   const netAPY = averageSupplyAPY - averageBorrowAPY;
 
@@ -105,6 +105,6 @@ export async function getUserSummary(address) {
     totalSuppliedUSD: summary.totalLiquidityUSD,
     totalBorrowedUSD: summary.totalBorrowsUSD,
     healthFactor: summary.healthFactor,
-    netAPY: netAPY * 100, 
+    netAPY: netAPY * 100,
   };
 }
