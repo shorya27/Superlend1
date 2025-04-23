@@ -1,0 +1,31 @@
+{
+  "name": "aave-stats",
+  "version": "1.0.0",
+  "description": "Express.js API for fetching Aave user statistics",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aave",
+    "defi",
+    "ethereum",
+    "web3"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@aave/contract-helpers": "^1.33.1",
+    "@aave/math-utils": "^1.33.1",
+    "@bgd-labs/aave-address-book": "^4.18.1",
+    "axios": "^1.8.4",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "ethers": "^5.8.0",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
