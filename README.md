@@ -17,8 +17,8 @@ This application uses the Aave SDK to fetch data for supplied and borrowed asset
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/aave-stats-api.git
-   cd aave-stats-api
+   git clone https://github.com/shorya27/Superlend1.git
+   cd Superlend1
    ```
 
 2. Install dependencies:
