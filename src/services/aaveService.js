@@ -27,7 +27,6 @@ const incentiveDataProviderContract = new UiIncentiveDataProvider({
   chainId: ChainId.mainnet,
 });
 
-//  function to calculate APY
 const calculateWeightedAPY = (userReservesData) => {
   let totalUSD = { supplied: 0, borrowed: 0 };
   let weightedAPY = { supply: 0, borrow: 0 };
@@ -49,7 +48,6 @@ const calculateWeightedAPY = (userReservesData) => {
   };
 };
 
-// Function to get user summary
 export async function getUserSummary(address) {
   const [
     reserves,
